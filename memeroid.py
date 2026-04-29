@@ -1,5 +1,7 @@
 import os
 import unicodedata
+from pydub import AudioSegment
+
 
 #参照する音声ファイル
 dir_path = "default"
@@ -10,9 +12,9 @@ worfiles = [f for f in os.listdir(dir_path+"/wor") if f.endswith(".wav")]
 
 #拡張子を除去
 for i in range(len(chafiles)):
-    chafiles[i] = chafiles[i][:-4]
+    chafiles[i] = unicodedata.normalize("NFC",chafiles[i][:-4])
 for i in range(len(worfiles)):
-    worfiles[i] = worfiles[i][:-4]
+    worfiles[i] = unicodedata.normalize("NFC", worfiles[i][:-4])
 
 #listを文字数でソートする関数
 def lst_sorted(lst):
@@ -25,7 +27,7 @@ def lst_sorted(lst):
 #単語を文字数でソート
 worfiles = lst_sorted(worfiles)
 
-#print(chafiles,worfiles)
+print(chafiles,worfiles)
 
 goal = input("??")
 
@@ -48,7 +50,7 @@ def wordsplit(text,worfiles=worfiles):
         #print(0,i,text,ni in nt)
         if ni in nt:
             #print(1,ni,nt)
-            a = text.find(ni)
+            a = nt.find(ni)
             b = a + len(ni)
             if b == len(nt):
                 #print(2,b,len(nt))
@@ -94,6 +96,20 @@ for i in range(len(wordlst)):
         wordlst[i+j] = wordlst[i+j][:-1]
         j += 1
 
-
-
 print(wordlst)
+
+def audio_worcha(text):
+    if text in chafiles:
+        return AudioSegment.from_wav(dir_path+"/cha/"+text+".wav")
+    if text in worfiles:
+        return AudioSegment.from_wav(dir_path+"/wor/"+text+".wav")
+    print(text)
+
+
+a = audio_worcha(wordlst[0])
+wordlst.pop(0)
+
+for i in wordlst:
+    b = audio_worcha(i)
+    a = a + b
+a.export(goal+".wav", format="wav")
