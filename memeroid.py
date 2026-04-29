@@ -4,7 +4,8 @@ from pydub import AudioSegment
 
 
 #参照する音声ファイル
-dir_path = "default"
+dir_path = "umehara"
+long_time = 50
 
 #音声ファイル名の取得
 chafiles = [f for f in os.listdir(dir_path+"/cha") if f.endswith(".wav")]
@@ -79,12 +80,12 @@ def boin(text):
         ["え","け","せ","て","ね","へ","め","れ","げ","ぜ","で","べ","ぺ","ぇ"],
         ["お","こ","そ","と","の","ほ","も","よ","ろ","を","ご","ぞ","ど","ぼ","ぉ","ょ"]
     ]
-
+    print("text",text)
     text = text[-2]
 
-    for i in aiueo:
-        if text in i:
-            return i[0]+"ー"
+    for k in aiueo:
+        if text in k:
+            return k[0]+"ー"
 
 wordlst = wordsplit(goal)
 
@@ -92,18 +93,30 @@ wordlst = wordsplit(goal)
 j = 0
 for i in range(len(wordlst)):
     if "ー" in wordlst[i+j]:
-        wordlst.insert(i+j+1, boin(wordlst[i]))
+        print("wordlst[i+j]",wordlst[i+j])
+        wordlst.insert(i+j+1, boin(wordlst[i+j]))
+        print("wordlst",wordlst)
         wordlst[i+j] = wordlst[i+j][:-1]
         j += 1
 
 print(wordlst)
 
 def audio_worcha(text):
+    if text == "　":
+        text = "_"
     if text in chafiles:
-        return AudioSegment.from_wav(dir_path+"/cha/"+text+".wav")
-    if text in worfiles:
-        return AudioSegment.from_wav(dir_path+"/wor/"+text+".wav")
-    print(text)
+        audio = AudioSegment.from_wav(dir_path+"/cha/"+text+".wav")
+    elif text in worfiles:
+        audio = AudioSegment.from_wav(dir_path+"/wor/"+text+".wav")
+    else:
+        raise ValueError(f"音声なし: {text}")
+
+    # 長さが足りない場合に無音追加
+    if len(audio) < long_time:
+        silence = AudioSegment.silent(duration=long_time - len(audio))
+        audio = audio + silence
+
+    return audio
 
 
 a = audio_worcha(wordlst[0])
