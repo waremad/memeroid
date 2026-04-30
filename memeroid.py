@@ -165,7 +165,7 @@ def one_docking(text):
 #ない文字合成
 def docking(text):
     if len(text) == 1:
-        if text in ["っ"," ","　"]:
+        if text in ["っ"," ","　","_","＿"]:
             return AudioSegment.silent(duration=long_time)
         elif text in [",","，","、",".","．","。"]:
             return AudioSegment.silent(duration=long_time*2)
