@@ -7,7 +7,7 @@ from datetime import datetime
 
 #参照する音声ファイル
 dir_path = "umehara"
-long_time = 100
+long_time = 200
 
 #音声ファイル名の取得
 chafiles = [f for f in os.listdir(dir_path+"/cha") if f.endswith(".wav")]
