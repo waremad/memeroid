@@ -27,6 +27,7 @@ def lst_sorted(lst):
 
 #単語を文字数でソート
 worfiles = lst_sorted(worfiles)
+chafiles = sorted(chafiles)
 
 print(chafiles,worfiles)
 
@@ -72,7 +73,7 @@ def wordsplit(text,worfiles=worfiles):
     return out
 
 #伸ばし棒の前の文字を母音にして返す
-def boin(text):
+def bar_boin(text):
     aiueo=[
         ["あ","か","さ","た","な","は","ま","や","ら","わ","が","ざ","だ","ば","ぱ","ぁ","ゃ"],
         ["い","き","し","ち","に","ひ","み","り","ぎ","じ","ぢ","び","ぴ","ぃ"],
@@ -94,22 +95,111 @@ j = 0
 for i in range(len(wordlst)):
     if "ー" in wordlst[i+j]:
         print("wordlst[i+j]",wordlst[i+j])
-        wordlst.insert(i+j+1, boin(wordlst[i+j]))
+        wordlst.insert(i+j+1, bar_boin(wordlst[i+j]))
         print("wordlst",wordlst)
         wordlst[i+j] = wordlst[i+j][:-1]
         j += 1
 
 print(wordlst)
 
+#末尾の文字を母音
+def boin(text):
+    aiueo=[
+        ["あ","か","さ","た","な","は","ま","や","ら","わ","が","ざ","だ","ば","ぱ","ぁ","ゃ"],
+        ["い","き","し","ち","に","ひ","み","り","ぎ","じ","ぢ","び","ぴ","ぃ"],
+        ["う","く","す","つ","ぬ","ふ","む","ゆ","る","ん","ぐ","ず","づ","ぶ","ぷ","ぅ","ゅ"],
+        ["え","け","せ","て","ね","へ","め","れ","げ","ぜ","で","べ","ぺ","ぇ"],
+        ["お","こ","そ","と","の","ほ","も","よ","ろ","を","ご","ぞ","ど","ぼ","ぉ","ょ"]
+    ]
+
+    for k in aiueo:
+        if text[-1] in k:
+            return k[0]
+
+#1文字を子音
+def shiin(text):
+    akstn=[
+        ["あ","い","う","え","お"],
+        ["か","き","く","け","こ"],
+        ["さ","し","す","せ","そ"],
+        ["た","ち","つ","て","と"],
+        ["な","に","ぬ","ね","の","ん",],
+        ["は","ひ","ふ","へ","ほ"],
+        ["ま","み","む","め","も"],
+        ["や","ゆ","よ"],
+        ["ら","り","る","れ","ろ"],
+        ["わ","を"],
+        ["が","ぎ","ぐ","げ","ご"],
+        ["ざ","じ","ず","ぜ","ぞ"],
+        ["だ","ぢ","づ","で","ど"],
+        ["ば","び","ぶ","べ","ぼ"],
+        ["ぱ","ぴ","ぷ","ぺ","ぽ"]
+    ]
+
+    for k in akstn:
+        if text in k:
+            return k[0]
+
+#一文字合成
+def one_docking(text):
+    text_boin = boin(text)
+    text_shiin = shiin(text)
+    print(text_boin,text_shiin,chafiles)
+    if text_boin in chafiles:
+        print(1,text_boin,text_shiin)
+        index_shiin = -1
+        for i in chafiles:
+            if shiin(i) == text_shiin:
+                index_shiin = chafiles.index(i)
+                break
+        print(2,index_shiin)
+        if index_shiin == -1:
+            raise ValueError(f"音声なし: {text}")
+        else:
+            a = AudioSegment.from_wav(dir_path+"/cha/"+text_boin+".wav")
+            b = AudioSegment.from_wav(dir_path+"/cha/"+chafiles[index_shiin]+".wav")
+            return a.overlay(b)
+    else:
+        raise ValueError(f"音声なし: {text}")
+
+#ない文字合成
+def docking(text):
+    if len(text) == 1:
+        if text in ["っ"," ","　"]:
+            return AudioSegment.silent(duration=long_time)
+        elif text in [",","，","、",".","．","。"]:
+            return AudioSegment.silent(duration=long_time*2)
+        else:
+            return one_docking(text)
+    elif text[-1] == "ー":
+        if text[-2] in chafiles:
+            a = AudioSegment.from_wav(dir_path+"/cha/"+text[-2]+".wav")
+            return a+a
+        else:
+            raise ValueError(f"音声なし: {text}")
+    elif text[-1] in mini_bar:
+        if len(text) == 2:
+            a = docking(text[0])
+            b = docking(text[1])
+            return a+b
+        else:
+            raise ValueError(f"音声なし: {text}")
+    else:
+        raise ValueError(f"音声なし: {text}")
+
+#文字や単語を音声ファイルに変換する関数
 def audio_worcha(text):
     if text == "　":
         text = "_"
+
     if text in chafiles:
         audio = AudioSegment.from_wav(dir_path+"/cha/"+text+".wav")
     elif text in worfiles:
         audio = AudioSegment.from_wav(dir_path+"/wor/"+text+".wav")
     else:
-        raise ValueError(f"音声なし: {text}")
+        audio = docking(text)
+
+    print(text)
 
     # 長さが足りない場合に無音追加
     if len(audio) < long_time:
@@ -117,7 +207,6 @@ def audio_worcha(text):
         audio = audio + silence
 
     return audio
-
 
 a = audio_worcha(wordlst[0])
 wordlst.pop(0)
