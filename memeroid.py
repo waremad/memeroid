@@ -1,11 +1,13 @@
 import os
 import unicodedata
 from pydub import AudioSegment
+from datetime import datetime
+
 
 
 #参照する音声ファイル
 dir_path = "umehara"
-long_time = 50
+long_time = 100
 
 #音声ファイル名の取得
 chafiles = [f for f in os.listdir(dir_path+"/cha") if f.endswith(".wav")]
@@ -31,6 +33,7 @@ chafiles = sorted(chafiles)
 
 print(chafiles,worfiles)
 
+#
 goal = input("??")
 
 mini_bar = ["ぁ","ぃ","ぅ","ぇ","ぉ","ゃ","ゅ","ょ","ー"]
@@ -88,7 +91,9 @@ def bar_boin(text):
         if text in k:
             return k[0]+"ー"
 
+#
 wordlst = wordsplit(goal)
+#wordlst = [""]
 
 #伸ばし棒処理
 j = 0
@@ -214,4 +219,6 @@ wordlst.pop(0)
 for i in wordlst:
     b = audio_worcha(i)
     a = a + b
-a.export(goal+".wav", format="wav")
+
+s = datetime.now().strftime("%Y%m%d_%H%M")
+a.export(s+"_"+goal+".wav", format="wav")
