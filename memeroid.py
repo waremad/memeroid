@@ -102,7 +102,7 @@ for i in range(len(wordlst)):
 
 print(wordlst)
 
-#末尾の文字を母音
+#末尾の文字の母音
 def boin(text):
     aiueo=[
         ["あ","か","さ","た","な","は","ま","や","ら","わ","が","ざ","だ","ば","ぱ","ぁ","ゃ"],
@@ -116,7 +116,7 @@ def boin(text):
         if text[-1] in k:
             return k[0]
 
-#1文字を子音
+#1文字の子音
 def shiin(text):
     akstn=[
         ["あ","い","う","え","お"],
@@ -140,7 +140,7 @@ def shiin(text):
         if text in k:
             return k[0]
 
-#一文字合成
+#ない一文字合成
 def one_docking(text):
     text_boin = boin(text)
     text_shiin = shiin(text)
